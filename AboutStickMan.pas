@@ -1,0 +1,45 @@
+unit AboutStickMan;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs;
+
+type
+  TForm2 = class(TForm)
+    procedure FormPaint(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form2: TForm2;
+
+implementation
+
+{$R *.DFM}
+
+procedure TForm2.FormPaint(Sender: TObject);
+var
+  bit1: tbitmap;
+begin
+     bit1:=tbitmap.create;
+     bit1.width:=clientwidth;
+     bit1.height:=clientheight;
+     with bit1.Canvas do
+     begin
+          font.name:='Arial';
+          Font.Size:=10;
+          TextOut(15,0,'If you like the StickMan class or the program,');
+          TextOut(15,20,'please vote for it at Planet-Source-Code.com');
+
+          TextOut(25,50,'The stickman class and this demo program');
+          TextOut(65,70,'was created by Josh Code.');
+     end;
+     Form2.Canvas.Draw(0,0,bit1);
+     bit1.free;
+end;
+
+end.

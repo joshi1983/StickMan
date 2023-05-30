@@ -1,0 +1,50 @@
+<html>
+<head><title>Using the tStickMan Class</title></head>
+<body>
+
+<h1>Using the tStickMan Class</h1>
+<h2>Introduction</h2>
+<dd>tStickMan was made for people to add animation to their programs quickly and easily.  The only requirement for animating the stickman is that you create, <A href="StickMan.html#Initialize">initialize</a>, and then keep calling the <A HREF="StickMan.html#DrawStickMan">DrawStickMan</A> procedure(maybe with a timer).  It is also recommended that you free the stickman when you are finished using him.  If you don't call the free procedure, he could waste memory even after the program ends.
+
+<h2>Contact</h2>
+<dd>If you have questions, comments, or even problems with using these classes, email me at <A HREF="mailto: greijos@hotmail.com">greijos@hotmail.com</a>.
+
+<h2>FAQ</h2>
+
+<h3>How do I get a StickMan in my program?</h3>
+<ul>
+<li>In your project file, the *.dpr file, in the uses section, you must include the StickMan unit and the location of the StickMan.pas file.<br>
+For example:
+<ul><li>StickMan <b>in</b> <font color=navy>'StickMan.pas'</font>,</li></ul></li><br>
+<li>Also, in the uses section of the unit using the stickman, include "StickMan".<br>
+For example:
+<ul><li><b>uses</b><dd><table><tr><td>
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ExtCtrls, StdCtrls,StickMan, Menus;</td></tr></table></li></ul></li>
+</ul>
+
+<h3>How do I stop getting an Access Violation?</h3>
+<ul>
+<li>Make sure that you have created the stickman.  This allocates memory for the stickman's properties.  The access happens because there is no place where a certain property actually is stored.  
+<li>You can create the stickman with a line like this: sm:=tStickMan.Create;
+<li>Don't create more than once, though.  That would be a waste of memory.
+<li>If the stickman has already eaten an object then creating the stickman is not the problem.  Make sure you aren't using the  eaten object anywhere.  You can't use the object's properties or events anywhere in the program.
+<li>Don't free any of the body parts of the stickman.  For example, don't execute a line like: sm.RightLeg.Free;
+<li>If you get an access violation just after you call the <a href="StickMan.html#RemoveObject">RemoveObject</a> procedure, make sure the object has not been destroyed.
+<li>If you get the error just after calling <a href="StickMan.html#JackingShowModal">JackingShowModal</a>, make sure the form being shown, has not been destroyed.  This shouldn't happen very often, though.  
+</ul>
+
+<h3>I see a filled rectangle around the stickman.  What's wrong?</h3>
+<ul>
+<li>This is caused by the stickman replacing the his background(rectangle) when he is drawn.  The background is first stored when the initialize procedure is called.  The rectangle is a copy of the rectangle that was there when the initialize procedure was called.
+<li>Try to initialize the stickman after the rectangle looks the way you want it to.  This could be OnPaint.  You can also use the <a href="StickMan.html#initialized">initialized</a> property to check if the stickman has already been initialized.
+</ul>
+  
+<h3>The stickman's rectangle is covering up an animation of mine.  How do I stop that?</h3>
+<dd>Set <a href="StickMan.html#ReplaceBackgrounds">ReplaceBackgrounds</a> and <a href="StickMan.html#UseDoubleBuffer">UseDoubleBuffer</a> to false.
+
+<h3>What happens to the objects after the stickman eats them?</h3>
+<dd>Not much. The computer forgets all about them.  If you try to use the eaten object's properties, you'll get an access violation.
+
+</body>
+</html>

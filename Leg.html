@@ -1,0 +1,82 @@
+<html>
+<head><title>tLeg Class</title></head>
+<body>
+<h1>tLeg Class</h1>
+<h2>Properties and Procedures</h2>
+<ul>
+<li><a href="#AutoUpdate">AutoUpdate</a></li>
+<li><a href="#Colour">Colour</a></li>
+<li><a href="#DrawLeg">DrawLeg</a></li>
+<li><a href="#Kick">Kick</a></li>
+<li><a href="#Initialize">Initialize</a></li>
+<li><a href="#Length">Length</a></li>
+<li><a href="#Update">Update</a></li>
+</ul>
+
+<h3><a name="AutoUpdate">property AutoUpdate: Boolean</a></h3>
+<dd>This is initially true.
+<dd>When this is true, the leg's animation is updated automatically when the leg is drawn.
+
+<h3><a name="Colour">property Colour: tColor</a></h3>
+<dd>The leg's colour
+
+<h3><a name="DrawLeg">procedure DrawLeg(can: tCanvas;x,y: integer)</a></h3>
+<dd>Draws the leg onto a canvas "can"
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>can: tCanvas</td>
+<td>the canvas the leg is to be drawn on</td>
+</tr>
+<tr>
+<td>x: integer</td>
+<td>the x coordinate of the hip joint</td>
+</tr>
+<tr>
+<td>y: integer</td>
+<td>the y coordinate of the hip joint</td>
+</tr>
+
+</table>
+<h3><a name="Kick">procedure Kick(KickingStyle: tKickStyle;KickRight: boolean)</a></h3>
+<dd>Starts a kicking animation
+<dd>If the leg is already in a kicking motion, it ignores the request for another kick.
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>KickingStyle: tKickingStyle</td>
+<td>The style of the kick.  This could be ksReallySlowKick, ksSlowKick, ksQuickKick, or ksFlashKick</td>
+</tr>
+<tr>
+<td>KickRight: Boolean</td>
+<td>This is true only when the leg is kicked to the right.</td>
+</tr>
+
+</table>
+
+<h3><a name="Initialize">procedure Initialize(ang: real;size: integer; VColour: tColor)</a></h3>
+<dd>This sets importent initial properties for the leg.
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>ang: real</td>
+<td>The angle of the leg</td>
+</tr>
+<tr>
+<td>size: integer</td>
+<td>The length of the leg</td>
+</tr>
+<tr>
+<td>VColour: tColor</td>
+<td>The colour of the leg</td>
+</tr>
+</table>
+
+<h3><a name="Length">property Length: integer</a></h3>
+<dd>The length of the leg
+
+<h3><a name="Update">procedure Update</a></h3>
+<dd>This is automatically called when the leg is drawn unless AutoUpdate is false.
+
+ </body>
+</html>

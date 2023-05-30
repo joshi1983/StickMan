@@ -1,0 +1,73 @@
+<html>
+<head><title>tEye Class</title></head>
+<body>
+<h1>tEye Class</h1>
+<h2>Properties and Procedures</h2>
+<ul>
+<li><a href="#AutoUpdate">AutoUpdate</a></li>
+<li><a href="#Blink">Blink</a></li>
+<li><a href="#Blinking">Blinking</a></li>
+<li><a href="#DrawEye">DrawEye</a></li>
+<li><a href="#EyeColour">EyeColour</a></li>
+<li><a href="#Focus">Focus</a></li>
+<li><a href="#Initialize">Initialize</a></li>
+<li><a href="#Update">Update</a></li>
+</ul>
+
+<h3><a name="AutoUpdate">property AutoUpdate: Boolean</a></h3>
+<dd>This is initially true.
+<dd>When this is true, the Eye's animation is updated automatically when it is drawn
+
+<h3><a name="Blink">procedure Blink</a></h3>
+<dd>This starts a blinking animation.
+<dd>You can also call this while the eye is blinking.
+
+<h3><a name="Blinking">property Blinking: Boolean</a></h3>
+<dd>This is true only when the eye is in the process of blinking.
+<dd>This is read only.
+
+<h3><a name="DrawEye">procedure DrawEye(can: tcanvas;x,y: integer)</a></h3>
+<dd>This draws the eye on a canvas "can".
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>can: tCanvas</td>
+<td>the canvas the leg is to be drawn on</td>
+</tr>
+<tr>
+<td>x: integer</td>
+<td>the x coordinate of the centre of the eye</td>
+</tr>
+<tr>
+<td>y: integer</td>
+<td>the y coordinate of the centre of the eye</td>
+</tr>
+</table>
+
+<h3><a name="EyeColour">property EyeColour: tColor</a></h3>
+<dd>The colour of the eye
+
+<h3><a name="Focus">property Focus: tPoint</a></h3>
+<dd>A point for the eye to track
+<dd>You could use this to make is look like the eye is looking at the cursor.
+
+<h3><a name="Initialize">procedure Initialize(sz: integer;EColour: tcolor)</a></h3>
+<dd>This sets some importent initial properties of the eye
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>sz: integer</td>
+<td>the size of the eye</td>
+</tr>
+<tr>
+<td>EColour: integer</td>
+<td>the colour of the eye</td>
+</tr>
+</table>
+
+<h3><a name="Update">procedure Update</a></h3>
+<dd>This updates the eye's animation.
+
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+program StickManDemoPro;
+
+uses
+  Forms,
+  MainU in 'MainU.pas' {Form1},
+  StickMan in 'StickMan.pas',
+  AboutStickMan in 'AboutStickMan.pas' {Form2};
+
+{$R *.RES}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TForm2, Form2);
+  Application.Run;
+end.

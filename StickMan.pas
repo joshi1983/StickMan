@@ -1,0 +1,1061 @@
+unit StickMan;
+{
+ When using the class, remember that calling "DrawStickMan" or somehow updating
+ the stickman is a necessity.  The demo called the draw procedure from a timer.
+ This is a good easy way to do it but you could call it other ways.
+ You can also draw the stickman without updating him by setting the AutoUpdate
+ property to false.
+
+ By default, double buffering is used to prevent flickery graphics but if you are
+ putting the stickman on an off screen canvas (one that won't show the drawing
+ process ie. a bitmap's canvas), you can turn UseDoubleBuffer to false.  This
+ can improve efficiency a little.
+
+ You can use this class with any canvas.  If you have any questions, comments, or
+ problems with this class, email me at greijos@hotmail.com.
+
+ There are html help files for people who want to use stickmen in their programs.
+ If you don't have them, just email me.
+}
+
+interface
+uses windows,Graphics,Classes,math,stdctrls,extctrls,Dialogs,forms;
+         type
+             tHairstyle = byte;
+             tKickStyle = byte;
+             tTorso = byte;
+             tEye = class
+                  EyeColour: tcolor;
+                  Focus: tpoint;
+                  protected
+                           PAutoUpdate: boolean;
+                           MaxDryness: integer;
+                           Dryness: integer; { used to determine how closed the
+                              eyes are and how close they are to naturally blinking}
+                           Size: integer;
+                           pBlinking: boolean; { true only when to start an unnatural blink
+                             like when the Blink procedure is called
+                            }
+                           function GetAutoUpdate: boolean;
+                           function GetBlinking: boolean;
+                           procedure SetAutoUpdate(NewVal: boolean);
+
+                  published
+                           property AutoUpdate: boolean read GetAutoUpdate write SetAutoUpdate;
+                           property Blinking: boolean read GetBlinking;
+                           procedure Blink;
+                           procedure DrawEye(can: tcanvas;x,y: integer);
+                           procedure initialize(sz: integer;EColour: tcolor);
+                           procedure Update;
+             end;
+             tArm = class
+              AutoUpdate: boolean;
+              length: integer;
+              protected
+                       pWaving: boolean;
+                       Startangle: real;
+                       angle: real;
+                       interval: integer;
+                       function GetWaving: boolean;
+                       procedure SetWaving(NewVal: boolean);
+              published
+                       property Waving: Boolean read GetWaving write SetWaving;
+                       procedure Initialize(InitAngle: real;iniLength: integer);
+                       procedure DrawArm(can: tcanvas;x,y: integer);
+                       procedure StartWaving;
+                       procedure StopWaving;
+                       procedure Update;
+             end;
+             tLeg = class
+                  AutoUpdate: boolean;
+                  Colour: tcolor;
+                  length: integer;
+                  protected
+                           InitAngle: real;
+                           angle: real;
+                           pKicking: boolean;
+                           Vel: shortint;
+                           KickingLeft: boolean;
+                           KickInterval: integer;
+                  published
+                           procedure Kick(KickingStyle: tKickStyle;KickRight: boolean);
+                           procedure Initialize(ang: real;size: integer; VColour: tcolor);
+                           procedure DrawLeg(can: tcanvas;x,y: integer);
+                           procedure Update;
+             end;
+             tStickMan = class
+              bearded: boolean;
+              ShirtColour: tcolor;
+              HairStyle: tHairStyle;
+              Torso: tTorso;
+              ReplaceBackgrounds: boolean;
+              SkinColour,HairColour: tcolor;
+              GlassesColour: tcolor;
+              WearingGlasses: boolean;
+              protected // properties, procedures, functions, only directly accessible in this unit
+                       Position: tpoint; // the centre of the head
+                       sPosition: tpoint; // changes based on value of pUseDoubleBuffer
+                       HeadHeight,HeadWidth: integer;
+                       pinterval: integer; // interval in making a jumping jack
+                       vel: integer;
+                       MakingJumpingJack: boolean; // true when a jumping jack animation is being done
+                       JackShowModal: boolean;
+                       // true only when a jumping jack animation is being done
+                       // that will end with showing a form
+                       JackForm: tform; // a form being shown using a jumping jack animation
+                       JFRect: trect; // a form to show in a jumping jack animation
+                       PAutoUpdate: boolean;
+                       PHeight: integer; // height of the entire body
+                       PWidth: integer; // dependent on height
+                       buffered: boolean; // made true after a background has been copied to the buffer
+                       PCanvas: tcanvas; // canvas currently drawn on
+                       BitmapDoubleBuffer: tbitmap;
+                       BitmapBuffer: tbitmap; // holds the background
+                       BuffRect: trect; // current rectangle in the bufferbitmap
+                       pInitialized: boolean; // true only after the initialize procedure is executed
+                       pUseDoubleBuffer: boolean;
+                       pObject: tObject; // an object that is being eaten
+                       pRemoving: integer; // true only when an object is being removed
+                       pLipColour: tColor;
+                       pLipStyle: byte; // the type of lips ie. thin, average, bold 
+                       pEyeBrowStyle: byte; // the type of eyebrows
+                       procedure SetCanvas(can: tcanvas);
+                       Function GetCanvas: tcanvas;
+                       Function GetHeight: integer;
+                       Function GetXPos: integer;
+                       procedure SetXPos(x: integer);
+                       Function GetYPos: integer;
+                       procedure SetYPos(y: integer);
+                       procedure SetHeight(NewHeight: integer);
+                       function GetPos: tpoint;
+                       procedure SetPos(NewPos: tpoint);
+                       function GetAutoUpdate: boolean;
+                       procedure SetAutoUpdate(NewVal: boolean);
+                       function GetInitialized: boolean;
+                       procedure SetUseDoubleBuffer(NewVal: boolean);
+                       function GetUseDoubleBuffer: boolean;
+                       function GetMakingStickMan: boolean;
+                       function GetEyeColour: tColor;
+                       procedure SetEyeColour(NewColour: tColor);
+                       function GetLipColour: tColor;
+                       procedure SetLipColour(NewColour: tColor);
+                       function GetLipStyle: byte;
+                       function GetEyebrowStyle: byte;
+                       procedure SetEyebrowStyle(NewStyle: byte);
+                       procedure SetLipStyle(NewStyle: byte);
+                       procedure PosChanged;
+                       procedure DrawHead(x,y: integer);
+                       procedure UpdateBuffer; // hide previous background and replace buffer
+                       procedure Remove_A_little(obj: tobject;x,y: integer);
+              public
+                    constructor Create;
+                    destructor Free;
+              published // properties and procedures accessible by programmers
+                       Leftarm,RightArm: tArm;
+                       LeftEye,RightEye: tEye;
+                       LeftLeg,RightLeg: tLeg; // the stickman's body parts
+                       property HeadPos: tpoint read GetPos write SetPos;
+                       property Height: integer read GetHeight write SetHeight;
+                       property Canvas: tCanvas read GetCanvas write SetCanvas;
+                       property x: integer read GetXPos write SetXPos;
+                       property y: integer read GetYPos write SetYPos;
+                       property AutoUpdate: boolean read GetAutoUpdate write SetAutoUpdate;
+                       property Initialized: boolean read GetInitialized;
+                       property UseDoubleBuffer: boolean read GetUseDoubleBuffer write SetUseDoubleBuffer;
+                       property MakingStickMan: boolean read GetMakingStickMan;
+                       property EyeColour: tColor read GetEyeColour write SetEyeColour;
+                       property LipColour: tColor read GetLipColour write SetLipColour;
+                       property LipStyle: byte read GetLipStyle write SetLipStyle;
+                       property EyeBrowStyle: byte read GetEyeBrowStyle write SetEyeBrowStyle;
+                       procedure DrawStickMan;
+                       procedure MakeJumpingJack;
+                       procedure JackingShowModal(frm: tform);
+                       procedure Hide;
+                       // draw the buffered background onto PCanvas to hide the the changes
+                       procedure Initialize(can: tcanvas;initHeight,x,y: integer;
+                          SknColour,EyColour,HrColour,ClColour: tcolor;Glasses,
+                          usebeard: boolean);
+                       procedure RemoveObject(obj: tobject);
+                       procedure Update;
+             end;
+
+const
+   // Hair Styles
+     hsBald = 0;
+     hsNearBald = 1;
+     hsNormal = 2;
+     hsThick = 3;
+     hsMoHawk = 4;
+     hsLongStraight = 5;
+
+   // Kicking Styles
+     ksReallySlowKick = 1;
+     ksSlowKick =3;
+     ksQuickKick = 9;
+     ksFlashKick = 29;
+
+   // Torso styles
+     tsSkinny = 1;
+     tsAverage = 2;
+     tsLarge = 4;
+     tsExtraLarge = 7;
+     tsSpherical = 10;
+     tsTooLarge = 15;
+
+   // Lip Styles
+     lsThin = 0;
+     lsAverage = 1;
+     lsBold = 2;
+
+   // EyeBrows
+     ebBushy = 0;
+     ebReallyBushy = 2;
+     ebAngry = 3;
+     ebLifted = 4;
+     ebVeryThin = 5;
+     ebArced = 6;
+
+
+implementation
+
+// ----------------------------------- tEye Class-------------------------------
+
+procedure tEye.DrawEye(can: tcanvas;x,y: integer);
+var
+  openness: byte;
+  size2: integer;
+  den: integer;
+begin
+     if PAutoUpdate then
+        Update; // update the animation
+     with can do
+     begin
+          if Dryness>2 then
+          begin
+               openness:=2;
+               pBlinking:=false;
+          end
+          else
+              openness:=abs(Dryness);
+          brush.color:=clwhite;
+          size2:=round(size*0.6);
+          Ellipse(x-size,y-size2*openness shr 1,x+size,y+size2*openness shr 1);
+          brush.color:=EyeColour;
+          pen.style:=psclear;
+          if openness>0 then
+          begin
+             if (focus.x<>0)or(focus.y<>0) then
+             begin // if a focus point is being used
+                  den:=round(sqrt(sqr(focus.x)+sqr(focus.y)));
+                  x:=round(x+arctan(focus.x/den)*size/pi);
+                  y:=round(y+arctan(focus.y/den)*size/pi);
+                  // now, the iris and pupil will be drawn in an area a little closer to the focus point
+                  // this makes it look like the eye is actually looking at the point
+             end;
+             Ellipse(x-size2,y-size2,x+size2,y+size2); // draw the iris
+             brush.color:=clBlack;
+             Size2:=Size2 shr 1;
+             Ellipse(x-size2,y-size2,x+size2,y+size2);
+             // draw the pupil
+          end;
+          pen.style:=pssolid;
+     end;
+end;
+
+procedure tEye.update;
+begin
+     inc(Dryness); // add 1 to the dryness
+     if Dryness>MaxDryness then // if the eye is getting really dry
+          Dryness:=0; // eye blinks
+end;
+
+procedure tEye.initialize(sz: integer;EColour: tcolor);
+begin
+     size:=sz; // size of the eye
+     MaxDryness:=40; // determines how long between natural blinks
+     Dryness:=0;
+     pBlinking:=false; // not initially in the process of a blink
+     PAutoUpdate:=true;
+     focus:=point(0,0); // initially the eye isn't looking anywhere specific
+     EyeColour:=EColour;
+end;
+
+procedure tEye.SetAutoUpdate(NewVal: boolean);
+begin
+     PAutoUpdate:=NewVal;
+end;
+
+function tEye.GetAutoUpdate: boolean;
+begin
+     result:=PAutoUpdate;
+end;
+
+function tEye.GetBlinking: boolean;
+begin
+     result:=pBlinking;
+end;
+
+procedure tEye.Blink;
+begin
+     dryness:=-2; // this causes the eye close before opening
+     pBlinking:=true;
+     // this is for the programmer using this class so he or she knows when the blinking animation is happening
+end;
+
+// ---------------------------------------------------------------------------
+//------------------------------------- tArm Class ----------------------------
+
+procedure tArm.StartWaving;
+begin // start the waving animation
+     pWaving:=true;
+end;
+
+procedure tArm.StopWaving;
+begin // stop the waving animation
+     pWaving:=false;
+end;
+
+procedure tArm.SetWaving(NewVal: boolean);
+begin
+     if NewVal then
+        StartWaving
+     else
+         StopWaving; // use the procedures because they may be updated later
+end;
+
+function tArm.GetWaving: Boolean;
+begin
+     result:=pWaving;
+end;
+
+procedure tArm.Update;
+begin
+     if pWaving then
+     begin
+          inc(interval);
+          angle:=StartAngle+cos(interval)/2;
+     end;
+end;
+
+procedure tArm.Initialize(InitAngle: real;iniLength: integer);
+begin
+     StartAngle:=InitAngle;
+     pWaving:=false;
+     length:=iniLength;
+     angle:=InitAngle;
+     interval:=0;
+     AutoUpdate:=true;
+end;
+
+procedure tArm.DrawArm(can: tcanvas;x,y: integer);
+var
+  sz: integer;
+begin
+     if AutoUpdate then
+        Update;
+     can.moveto(x,y); // the shoulder
+     // now, calculate the coordinates of the hand
+     x:=x+round(length*cos(angle));
+     y:=y+round(length*sin(angle));
+     can.lineto(x,y); // draw line to hand
+     sz:=length shr 4;
+     can.ellipse(x-sz,y-sz,x+sz,y+sz); // draw something like a hand
+end;
+
+// ----------------------------------------------------------------------------
+// ----------------------------- tLeg class -----------------------------------
+
+procedure tLeg.Initialize(ang: real;size: integer; VColour: tcolor);
+begin
+     Length:=Size;
+     AutoUpdate:=true;
+     Colour:=VColour;
+     initangle:=ang;
+     pKicking:=false;
+     angle:=ang;
+     vel:=0;
+end;
+
+procedure tLeg.Kick(KickingStyle: tKickStyle;KickRight: boolean);
+begin
+     if not pKicking then
+     begin
+          vel:=KickingStyle;
+          if not KickRight then
+             vel:=-vel;
+          pKicking:=true;
+          KickingLeft:=not KickRight;
+     end;
+end;
+
+procedure tLeg.DrawLeg(can: tcanvas;x,y: integer);
+begin
+     if AutoUpdate then
+        Update;
+     with can do
+     begin
+          pen.color:=Colour;
+          moveto(x,y);
+          x:=x+round(length*cos(angle));
+          y:=y+round(length*sin(angle));
+          lineto(x,y);
+     end;
+end;
+
+procedure tLeg.Update;
+begin
+     if pKicking then
+     begin
+          inc(KickInterval,vel);
+          angle:=initangle+KickInterval/20;
+          if abs(KickInterval)>30 then
+             vel:=-vel
+          else if (KickingLeft and (KickInterval>0))or(not KickingLeft and (KickInterval<0)) then
+          begin
+               vel:=0;
+               angle:=initangle;
+               pKicking:=false;
+          end;
+     end;
+     // nothing to do yet
+end;
+
+// ----------------------------------------------------------------------------
+// ---------------------------------- tStickMan Class -------------------------
+
+procedure tStickMan.Remove_A_little(obj: tobject;x,y: integer);
+var // this procedure is called when an object is being eaten
+  btn: tbutton;
+  edt: tedit;
+  lbl: tlabel;
+  rdg: tradiogroup;
+  chb: tCheckBox;
+  // different identifiers for each possible type of object
+begin
+     if obj is tbutton then
+     begin
+          btn:=obj as tbutton;
+          btn.Caption:='Help Me!!!!';
+          btn.left:=round(btn.left*0.9+x*0.1);
+          btn.top:=round(btn.top*0.9+y*0.1);
+          btn.height:=round(btn.height*0.9);
+          btn.width:=round(btn.width*0.9);
+     end
+     else if obj is tedit then
+     begin
+          edt:=obj as tedit;
+          edt.Text:='Help Me!!!!';
+          edt.left:=round(edt.left*0.85+x*0.15);
+          edt.top:=round(edt.top*0.85+y*0.15);
+          edt.height:=round(edt.height*0.85);
+          edt.width:=round(edt.width*0.85);
+     end
+     else if obj is tlabel then
+     begin
+          lbl:=obj as tlabel;
+          lbl.Caption:='Help Me!!!!';
+          lbl.left:=round(lbl.left*0.85+x*0.15);
+          lbl.top:=round(lbl.top*0.85+y*0.15);
+          lbl.height:=round(lbl.height*0.85);
+          lbl.width:=round(lbl.width*0.85);
+     end
+     else if obj is tradiogroup then
+     begin
+          rdg:=obj as tRadioGroup;
+          rdg.Caption:='Help Me!!!!';
+          rdg.left:=round(rdg.left*0.85+x*0.15);
+          rdg.top:=round(rdg.top*0.85+y*0.15);
+          rdg.height:=round(rdg.height*0.85);
+          rdg.width:=round(rdg.width*0.85);
+     end
+     else if obj is tCheckBox then
+     begin
+          chb:=obj as tCheckBox;
+          chb.Caption:='Help Me!!!!';
+          chb.left:=round(chb.left*0.85+x*0.15);
+          chb.top:=round(chb.top*0.85+y*0.15);
+          chb.height:=round(chb.height*0.85);
+          chb.width:=round(chb.width*0.85);
+     end
+     else
+     begin
+          pRemoving:=0; // stop the removing animation
+          ShowMessage('I don''t know what that is.  I can''t eat that.');
+     end;
+end;
+
+procedure tStickMan.Update;
+begin
+     if not (LeftEye.pBlinking or RightEye.pBlinking)then
+        LeftEye.Dryness:=RightEye.Dryness;
+        // keep the blinking in sinc with one another
+     if pRemoving>0 then
+     begin
+          Remove_A_little(pObject,position.x,position.y+HeadHeight shr 1);
+          if pRemoving<3 then
+          begin
+               pObject.Destroy;
+               pRemoving:=0;
+          end;
+          dec(pRemoving);
+     end;
+     // if the body parts don't update automatically, update them anyway
+     if not LeftEye.pAutoUpdate then
+          LeftEye.Update;
+     if not RightEye.pAutoUpdate then
+          RightEye.Update;
+     if not LeftLeg.AutoUpdate then
+          LeftLeg.Update;
+     if not RightLeg.AutoUpdate then
+          RightLeg.Update;
+     // --------------------------------------------------------------------
+     if MakingJumpingJack then
+     begin
+          inc(pinterval,vel);
+          if JackShowModal then
+          begin
+               JackForm.Width:=round(abs(2*rightarm.length*cos(rightarm.angle)));
+               JackForm.Left:=JFRect.Left+((JFRect.Right-JackForm.Width) shr 1);
+          end;
+          if pinterval>36 then
+          begin
+               vel:=-abs(vel);
+               if JackShowModal then
+               begin
+                    JackForm.Width:=0;
+                    JackForm.ShowModal;
+               end;
+          end
+          else if pInterval<0 then
+          begin
+               pInterval:=0;
+               MakingJumpingJack:=false;
+               vel:=0;
+               if JackShowModal then
+               begin
+                    JackForm.Top:=JFRect.top;
+                    JackForm.Left:=JFRect.Left;
+                    JackForm.Height:=JFRect.bottom;
+                    JackForm.width:=JFRect.right;
+                    JackShowModal:=false;
+               end;
+          end;
+          RightArm.angle:=RightArm.Startangle+pinterval*pi/72;
+          LeftArm.angle:=LeftArm.Startangle-pinterval*pi/72;
+          RightLeg.angle:=RightLeg.InitAngle+pinterval*pi/72;
+          LeftLeg.angle:=LeftLeg.InitAngle-pinterval*pi/72;
+     end;
+end;
+
+procedure tStickMan.MakeJumpingJack;
+begin
+     if not MakingJumpingJack then
+     begin
+          vel:=10; // a speed for the animation
+          pinterval:=0; // initial time
+          MakingJumpingJack:=true;
+     end;
+end;
+
+procedure tStickMan.DrawHead(x,y: integer);
+var
+ szh,x2,x3: integer;
+ szw: integer;
+ can: tcanvas;
+begin
+     if pAutoUpdate then
+        Update; // update the animation
+     if pUseDoubleBuffer then
+        can:=BitmapDoubleBuffer.Canvas // draw on the buffer's canvas
+     else
+         can:=PCanvas;
+     with can do
+     begin
+          // --- draw a blank face to be covered with facial features ---------
+          Brush.color:=SkinColour;
+          ellipse(x-HeadWidth,y-HeadHeight,x+HeadWidth,y+HeadHeight); // the back of the face
+          // ------------------------------
+          // --- draw mouth --------------
+          Brush.color:=clBlack;
+          szh:=round(HeadHeight*0.6);
+          szw:=round(HeadWidth*0.6);
+          case pLipStyle of
+           lsAverage: pen.Width:=HeadHeight shr 4;
+           lsBold: pen.Width:=HeadHeight shr 3;
+          end;
+          pen.color:=pLipColour;
+          if pRemoving<1 then // no objects are getting eaten
+             Arc(x-szw,y-szh,x+szw,y+szh,
+               x-szw,y+HeadHeight,
+               x+szw,y+HeadHeight)
+          else
+          begin
+               Ellipse(x-szw shr 1,y+szh,x+szw shr 1,y+round(szh*(1+(30-pRemoving)/50)));
+          end;
+          // -----------------------------
+          // --- draw glasses -------------
+          pen.width:=1;
+          pen.color:=GlassesColour;
+          Brush.color:=SkinColour;
+          szw:=round(szw*0.8);
+          x2:=x-szw;
+          x3:=x+szw;
+          szh:=HeadHeight shr 2;
+          if WearingGlasses then // draw glasses
+          begin
+               ellipse(x2-szw,y-szh,x2+szw,y+szh);
+               ellipse(x3-szw,y-szh,x3+szw,y+szh);
+          end;
+
+          // ------------------------------
+          // ------ draw eyes -------------
+
+          LeftEye.DrawEye(Can,x3,y);
+          RightEye.DrawEye(Can,x2,y);
+
+          // ------------------------------
+          // ---- draw hair ---------------
+
+          pen.color:=HairColour;
+          if HairStyle=hsThick then
+             pen.width:=HeadHeight shr 1
+          else
+              pen.width:=HeadHeight shr 2;
+          case HairStyle of
+            hsNormal,hsThick,hsLongStraight:
+                 begin
+                   Arc(x+HeadWidth,y+HeadHeight,x-HeadWidth,y-HeadHeight,
+                      x+HeadWidth,y-szh,
+                      x-HeadWidth,y-szh);
+                   if HairStyle=hsLongStraight then
+                   begin
+                        moveto(x-HeadWidth,y-szh);
+                        lineto(x-HeadWidth,y+HeadHeight);
+                        moveto(x+HeadWidth,y-szh);
+                        lineto(x+HeadWidth,y+HeadHeight);
+                   end;
+                 end;
+            hsNearBald:
+                 begin
+                   Arc(x+HeadWidth,y+HeadHeight,x-HeadWidth,y-HeadHeight,
+                      x+HeadWidth,y-szh,
+                      x+HeadWidth,y-HeadHeight);
+                   Arc(x+HeadWidth,y+HeadHeight,x-HeadWidth,y-HeadHeight,
+                      x-HeadWidth,y-HeadHeight,
+                      x-HeadWidth,y-szh);
+                 end;
+            hsMoHawk:
+                 begin
+                      moveto(x,y-round(HeadHeight*0.7));
+                      lineto(x,y-HeadHeight);
+                 end;
+          end;
+          // --------------------------------
+          // --- draw beard -----------------
+
+          if bearded then // if there is a beard
+          begin
+               pen.width:=HeadHeight shr 3;
+               szh:=round(HeadHeight*0.95);
+               szw:=round(HeadWidth*0.95);
+               Arc(x+szw,y+szh,x-szw,y-szh,
+                  x-szw,y+szh,
+                  x+szw,y+szh);
+          end;
+
+          // -------------------------
+          // --- eyebrows -------------
+
+          szh:=headHeight shr 2;
+          szw:=headWidth shr 2;
+          pen.color:=HairColour;
+          case pEyeBrowStyle of
+          ebBushy: begin
+                        pen.width:=szh shr 1;
+                        moveto(x2-szw,y-szh);
+                        lineto(x-szw,y-szh);
+                        moveto(x+szw,y-szh);
+                        lineto(x3+szw,y-szh);
+                   end;
+          ebReallyBushy:
+                   begin
+                        pen.width:=szh;
+                        moveto(x2-szw,y-szh);
+                        lineto(x-szw,y-szh);
+                        moveto(x+szw,y-szh);
+                        lineto(x3+szw,y-szh);
+                   end;
+          ebAngry: begin
+                        pen.width:=szh shr 1;
+                        moveto(x2-szw,y-szh-(szh shr 1));
+                        lineto(x-szw,y-szh+(szh shr 2));
+                        moveto(x+szw,y-szh+(szh shr 2));
+                        lineto(x3+szw,y-szh-(szh shr 1));
+                   end;
+          ebLifted:begin
+                        pen.width:=szh*6 div 16;
+                        moveto(x2-szw,y-szh-(szh shr 1));
+                        lineto(x-szw,y-szh-(szh shr 3));
+                        moveto(x+szw,y-szh-(szh shr 3));
+                        lineto(x3+szw,y-szh-(szh shr 1));
+                   end;
+          ebVeryThin:begin
+                        pen.width:=szh shr 2;
+                        moveto(x2-szw,y-szh-(szh shr 1));
+                        lineto(x-szw,y-szh-(szh shr 3));
+                        moveto(x+szw,y-szh-(szh shr 3));
+                        lineto(x3+szw,y-szh-(szh shr 1));
+                   end;
+          ebArced: begin
+                        pen.width:=szh*9 div 32;
+                        moveto(x2-szw,y-szh-(szh*3 div 32));
+                        lineto(x2-(szw*5 div 8),y-szh-(szh*3 div 8));
+                        lineto(x-szw,y-szh-(szh*3 div 32));
+
+                        moveto(x+szw,y-szh-(szh*3 div 32));
+                        lineto(x3+(szw*5 div 8),y-szh-(szh*3 div 8));
+                        lineto(x3+szw,y-szh-(szh*3 div 32));
+                   end;
+          end;
+          Pen.width:=1;
+
+          // ---------------------
+          // ---- nose -----------
+
+          szh:=round(HeadHeight*0.33);
+          pen.color:=clBlack;
+          moveto(x-szw shr 1,y+szh);
+          lineto(x+szw shr 1,y+szh);
+
+          // ---------------------
+     end;
+end;
+
+procedure tStickMan.DrawStickMan;
+var
+  joint: tpoint;
+  can: tcanvas; // the canvas being drawn on
+  ShoulderWidth: integer;
+begin
+     UpdateBuffer; // hide the previous view and get this rectangle saved for next frame
+     DrawHead(sposition.x,sposition.y); // put a head on him or her
+     if pUseDoubleBuffer then // if the double buffer is being used
+        can:=BitmapDoubleBuffer.canvas // use the bitmap's canvas
+     else                         // otherwise
+         can:=PCanvas;
+         // use the tStickMan.Canvas that the programmer selected
+     with can do
+     begin
+          pen.color:=ShirtColour;
+          pen.width:=(pHeight*Torso) shr 5;
+          MoveTo(sposition.x,sposition.y+HeadHeight+Pen.Width shr 1);
+          lineto(sposition.x,sposition.y+(pheight-Pen.Width) shr 1); // torsow
+          moveto(sposition.x,penpos.y+(Pen.Width shr 1));
+          ShoulderWidth:=pen.width shr 1;
+          pen.width:=pHeight shr 6;
+          joint:=penpos; // near the shoulders
+          LeftLeg.DrawLeg(can,joint.x,joint.y);
+          RightLeg.DrawLeg(can,joint.x,joint.y);
+
+          joint:=point(sposition.x,sposition.y+pheight div 6);
+          // near the base of the kneck, also near his shoulders
+          brush.color:=SkinColour;
+          pen.width:=ShoulderWidth shr 2;
+          pen.Color:=ShirtColour;
+          MoveTo(joint.x+ShoulderWidth,joint.y);
+          LineTo(joint.x-ShoulderWidth,joint.y);
+          pen.width:=ShoulderWidth div 6;
+          pen.color:=SkinColour;
+          LeftArm.DrawArm(can,joint.x+ShoulderWidth,joint.y);
+          RightArm.DrawArm(can,joint.x-ShoulderWidth,joint.y); // draw the arms
+          pen.width:=1;
+     end;
+     if pUseDoubleBuffer then
+        PCanvas.Draw(BuffRect.Left,BuffRect.Top,BitmapDoubleBuffer);
+end;
+
+procedure tStickMan.UpdateBuffer;
+var
+ NewBuffRect: trect;
+ left1,top1: integer;
+begin
+     if ReplaceBackGrounds then
+     begin
+          BitmapBuffer.Height:=PHeight shl 1;
+          BitmapBuffer.Width:=PWidth;
+          left1:=position.x-PWidth shr 1;
+          top1:=position.y-PHeight div 3;
+          NewBuffRect:=rect(left1,top1,left1+BitmapBuffer.width,top1+BitmapBuffer.height);
+          if not pUseDoubleBuffer then
+          begin
+               if buffered then
+                  PCanvas.Draw(BuffRect.left,BuffRect.top,BitmapBuffer);
+
+               NewBuffRect:=rect(left1,top1,left1+BitmapBuffer.width,top1+BitmapBuffer.height);
+               BitmapBuffer.Canvas.CopyRect(Rect(0,0,BitmapBuffer.Width,BitmapBuffer.Height),
+               Pcanvas,NewBuffRect);
+
+          // shrink dimensions to help conserve memory
+               BitmapDoubleBuffer.Height:=1;
+               BitmapDoubleBuffer.Width:=1;
+          end
+          else
+          begin
+               BitmapDoubleBuffer.Height:=BitmapBuffer.Height;
+               BitmapDoubleBuffer.Width:=BitmapBuffer.Width;
+               if buffered then
+                  BitmapDoubleBuffer.canvas.Draw(0,0,BitmapBuffer);
+          end;
+          BuffRect:=NewBuffRect;
+          buffered:=true;
+     end;
+end;
+
+procedure tStickMan.Hide;
+begin
+     PCanvas.Draw(BuffRect.Left,BuffRect.Top,BitmapBuffer);
+end;
+
+// --- reading and writing properties ----------------------------
+
+procedure tStickMan.SetHeight(NewHeight: integer);
+begin
+     PHeight:=NewHeight;
+     PWidth:=PHeight;
+     HeadHeight:=Height div 10;
+     HeadWidth:=Height div 11; // the head is a little taller than it is fat
+end;
+
+Function tStickMan.GetHeight: integer;
+begin
+     Result:=PHeight;
+end;
+
+procedure tStickMan.SetCanvas(can: tcanvas);
+begin
+     UpdateBuffer;
+     PCanvas:=can;
+     buffered:=false;
+end;
+
+function tStickMan.GetCanvas: tcanvas;
+begin
+     result:=PCanvas;
+end;
+
+procedure tStickMan.PosChanged;
+begin
+     if ReplaceBackgrounds and buffered then
+        PCanvas.Draw(buffrect.left,buffrect.top,BitmapBuffer);
+     buffered:=false;
+     SetUseDoubleBuffer(pUseDoubleBuffer);
+     // just calling to update sposition
+end;
+
+function tStickMan.GetEyeColour: tColor;
+begin
+     result:=RightEye.EyeColour;
+end;
+
+procedure tStickMan.SetEyeColour(NewColour: tColor);
+begin
+     RightEye.EyeColour:=NewColour;
+     LeftEye.EyeColour:=NewColour;
+end;
+
+function tStickMan.GetLipColour: tColor;
+begin
+     result:=pLipColour;
+end;
+
+procedure tStickMan.SetLipColour(NewColour: tColor);
+begin
+     pLipColour:=NewColour;
+end;
+
+function tStickMan.GetLipStyle: byte;
+begin
+     result:=pLipStyle;
+end;
+
+procedure tStickMan.SetLipStyle(NewStyle: byte);
+begin
+     pLipStyle:=NewStyle;
+end;
+
+function tStickMan.GetEyebrowStyle: byte;
+begin
+     result:=pEyebrowStyle;
+end;
+
+procedure tStickMan.SetEyebrowStyle(NewStyle: byte);
+begin
+     pEyebrowStyle:=NewStyle;
+end;
+
+procedure tStickMan.SetXPos(x: integer);
+begin
+     PosChanged;
+     Position.x:=x;
+end;
+
+procedure tStickMan.SetYPos(Y: integer);
+begin
+     PosChanged;
+     Position.y:=y;
+end;
+
+function tStickMan.GetXPos: integer;
+begin
+     result:=Position.x;
+end;
+
+function tStickMan.GetYPos: integer;
+begin
+     result:=Position.y;
+end;
+
+procedure tStickMan.SetPos(NewPos: tpoint);
+begin
+     PosChanged;
+     Position:=NewPos;
+end;
+
+function tStickMan.GetPos: tpoint;
+begin
+     result:=Position;
+end;
+
+procedure tStickMan.SetAutoUpdate(NewVal: boolean);
+begin
+     PAutoUpdate:=NewVal;
+     LeftEye.AutoUpdate:=PAutoUpdate;
+     RightEye.AutoUpdate:=PAutoUpdate;
+     LeftArm.AutoUpdate:=PAutoUpdate;
+     RightArm.AutoUpdate:=PAutoUpdate;
+     LeftLeg.AutoUpdate:=PAutoUpdate;
+     RightLeg.AutoUpdate:=PAutoUpdate;
+     // the subclasses also use the same autoupdate value
+end;
+
+procedure tStickMan.SetUseDoubleBuffer(NewVal: boolean);
+begin
+     if NewVal then // use the doublebuffer
+     begin
+          sPosition.x:=BitmapBuffer.width shr 1;
+          sPosition.y:=BitmapBuffer.height div 6;
+     end
+     else
+     begin
+          sPosition.x:=Position.x;
+          sPosition.y:=Position.y;
+     end;
+     pUseDoubleBuffer:=NewVal;
+end;
+
+function tStickMan.GetUseDoubleBuffer: boolean;
+begin
+     result:=pUseDoubleBuffer;
+end;
+
+function tStickMan.GetAutoUpdate: boolean;
+begin
+     result:=PAutoUpdate;
+end;
+
+function tStickMan.GetInitialized: boolean;
+begin
+     result:=PInitialized;
+end;
+
+function tStickMan.GetMakingStickMan: boolean;
+begin
+     result:=MakingStickMan;
+end;
+// ---------------procedures ------------------------------------------
+procedure tStickMan.RemoveObject(obj: tobject);
+begin
+     if pRemoving<1 then
+     begin
+          if pObject=nil then // if the stickman hasn't eaten any objects yet
+             ShowMessage('I''m starved.  '+#13
+             +'Just look at me.  Can you blame me?  '+#13
+             +'That object looks good.');
+          pObject:=obj; // make it so the stickman knows what object to remove
+          pRemoving:=30;
+     end;
+end;
+
+procedure tStickMan.JackingShowModal(frm: tform);
+begin
+     JackShowModal:=true;
+     JackForm:=frm;
+     JFRect:=Rect(JackForm.Left,JackForm.Top,JackForm.width,JackForm.height);
+     // temperarily store the form's dimensions and location so it can be restored
+     // by the end of the animation
+     MakeJumpingJack;
+end;
+
+procedure tStickMan.Initialize(can: tcanvas;initHeight,x,y: integer;SknColour,EyColour,
+HrColour,ClColour: tcolor;Glasses,useBeard: boolean);
+begin
+     SetHeight(initHeight);
+     SkinColour:=SknColour;
+     HairColour:=HrColour;
+     pLipColour:=clRed;
+     pLipStyle:=lsAverage;
+     pEyebrowStyle:=ebVeryThin;
+     LeftArm.Initialize(0,round(Height*0.23));
+     RightArm.Initialize(pi,round(height*0.23));
+     LeftEye.Initialize(Height div 45,EyColour);
+     RightEye.Initialize(Height div 45,EyColour);
+     LeftLeg.Initialize(pi/2-pi/16,pHeight shr 1,ClColour);
+     RightLeg.Initialize(pi/2+pi/16,pHeight shr 1,ClColour);
+     WearingGlasses:=Glasses;
+     ShirtColour:=ClColour;
+     GlassesColour:=clBlack;
+     bearded:= usebeard;
+     HairStyle:=hsNormal;
+     PAutoUpdate:=true;
+     buffered:=false; // only true when graphics are stored in the bitmapbuffer
+     SetCanvas(can);
+     SetPos(point(x,y));
+     ReplaceBackgrounds:=true;
+     MakingJumpingJack:=false;
+     JackShowModal:=false;
+     Torso:=tsAverage;
+     pInterval:=0;
+     vel:=0;
+
+     UpdateBuffer; // basically just update the buffer
+     UseDoubleBuffer:=true;
+     PInitialized:=true;
+end;
+
+constructor tStickMan.Create;
+begin // create the instances of classes used in the stickman's body parts and buffers
+     inherited Create;
+     BitmapBuffer:=tbitmap.create;
+     BitmapDoubleBuffer:=tbitmap.create;
+     LeftArm:=tArm.Create;
+     RightArm:=tArm.Create;
+     LeftEye:=tEye.Create;
+     RightEye:=tEye.Create;
+     LeftLeg:=tLeg.Create;
+     RightLeg:=tLeg.Create;
+end;
+
+destructor tStickMan.Free;
+begin // free all the instances created by the stickman
+     LeftArm.Free;
+     RightArm.Free;
+     LeftEye.Free;
+     RightEye.Free;
+     LeftLeg.Free;
+     RightLeg.Free;
+     BitmapBuffer.Free;
+     BitmapDoubleBuffer.Free;
+     PInitialized:=false;
+end;
+
+end.

@@ -1,0 +1,230 @@
+<HTML><HEAD><title>tStickMan Class</title>
+</HEAD>
+<body>
+<h1>tStickMan Class</h1>
+<h2>Properties and Procedures</h2>
+
+<ul>
+<li><a href="#AutoUpdate">AutoUpdate</a></li>
+<li><a href="#Bearded">Bearded</a></li>
+<li><a href="#Canvas">Canvas</a></li>
+<li><a href="#DrawStickMan">DrawStickMan</a></li>
+<li><a href="#EyeColour">EyeColour</a></li>
+<li><a href="#EyebrowStyle">EyebrowStyle</a></li>
+<li><a href="#HairColour">HairColour</a></li>
+<li><a href="#HairStyle">HairStyle</a></li>
+<li><a href="#HeadPos">HeadPos</a></li>
+<li><a href="#Height">Height</a></li>
+<li><a href="#Hide">Hide</a></li>
+<li><a href="#Initialized">Initialized</a></li>
+<li><a href="#Initialize">Initialize</a></li>
+<li><a href="#JackingShowModal">JackingShowModal</a></li>
+<li><a href="#Leftarm">LeftArm</a></li>
+<li><a href="#LeftEye">LeftEye</a></li>
+<li><a href="#LeftLeg">LeftLeg</a></li>
+<li><a href="#LipColour">LipColour</a></li>
+<li><a href="#MakingJumpingJack">MakingJumpingJack</a></li>
+<li><a href="#MakeJumpingJack">MakeJumpingJack</a></li>
+<li><a href="#ReplaceBackgrounds">ReplaceBackgrounds</a></li>
+<li><a href="#RightArm">RightArm</a></li>
+<li><a href="#RightEye">RightEye</a></li>
+<li><a href="#RightLeg">RightLeg</a></li>
+<li><a href="#ShirtColour">ShirtColour</a></li>
+<li><a href="#SkinColour">SkinColour</a></li>
+<li><a href="#Torso">Torso</a></li>
+<li><a href="#Update">Update</a></li>
+<li><a href="#UseDoubleBuffer">UseDoubleBuffer</a></li>
+<li><a href="#WearingGlasses">WearingGlasses</a></li>
+<li><a href="#X">x</a></li>
+<li><a href="#Y">y</a></li>
+
+</ul>
+
+<h3><a name="AutoUpdate"><b>property</b> AutoUpdate: Boolean</a></h3>
+<dd>AutoUpdate determines if the stickman should be updated when the stickman is drawn.  Initially, this value is true.  
+<dd>When you change this property, the AutoUpdate property of the stickman's arms, legs, and eyes also are set to the same value.
+
+<h3><a name="Bearded"><b>property</b> Bearded: Boolean</a></h3>
+<dd>Determines if the stickman has a beard
+
+<h3><a name="Canvas"><b>property</b> Canvas: tCanvas</a></h3>
+<dd>The canvas, the stickman is drawn on
+<dd>See <a href="#UseDoubleBuffer">UseDoubleBuffer</a> for suggestions about certain canvases.
+
+<h3><a name="DrawStickMan"><b>procedure</b> DrawStickMan;</a></h3>
+<dd>Draws the stickman on his canvas
+
+<h3><a name="EyeColour"><b>property</b> EyeColour: tColor;</a></h3>
+<dd>This property can be used to set the colour of the stickman's eyes.
+<dd>You can also use LeftEye.EyeColour and RightEye.EyeColour but since each eye usually has the same colour, this property is more efficient.
+
+<h3><a name="EyebrowStyle"><b>property</b> EyebrowStyle: byte;</a></h3>
+<dd>This property determines the type of eyebrow the stickman has.
+<dd>Same values include ebBushy, ebReallyBushy, ebLifted, ebVeryThin, ebArced.
+
+<h3><a name="HairColour"><b>property</b> HairColour: tColor</a></h3>
+<dd>The colour of the stickman's hair and his beard, if he has one
+
+<h3><a name="HairStyle"><b>property</b> HairStyle: tHairStyle</a></h3>
+<dd>The stickman's style of hair
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Posible Values</b>
+<tr>
+<td>hsBald</td>
+<td>Doesn't show any hair</td>
+</tr>
+<tr>
+<td>hsNearBald</td>
+<td>The stickman has lost a lot of hair but he still has some on the sides</td>
+</tr>
+<tr>
+<td>hsNormal</td>
+<td>The guy doesn't have any particullar hair style.  This is the initial hair style.</td>
+</tr>
+<tr>
+<td>hsThick</td>
+<td>The stickman has big fluffy hair like Richard Simmons.</td>
+</tr>
+<tr>
+<td>hsMohawk</td>
+<td>The stickman has a little patch on the top of his head.</td>
+</tr>
+<tr>
+<td>hsLongStraight</td>
+<td>The stickman has long straight hair.</td>
+</tr>
+
+</table>
+
+<h3><a name="HeadPos"><b>property</b> HeadPos: tPoint</a></h3>
+<dd>The point in the centre of of the stickman's head. 
+
+<h3><a name="Height"><b>property</b> Height: integer</a></h3>
+<dd>This is the height of the stickman.  Other features are scaled to the height of the stickman.
+
+<h3><a name="Hide"><b>procedure</b> Hide</a></h3>
+<dd>Removes the image of the stickman
+
+<h3><a name="Initialize"><b>procedure</b> Initialize(can: tcanvas;initHeight,x,y: integer;
+                          SknColour,EyColour,HrColour,ClColour: tcolor;Glasses,
+                          usebeard: boolean)</a></h3><br>
+<dd>Gives the stickman some importent initial values
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>can: tcanvas</td>
+<td>The canvas, the stickman will be drawn on</td>
+</tr>
+<tr>
+<td>InitHeight: integer</td>
+<td>The height of the stickman</td>
+</tr>
+<tr>
+<td>x: integer</td>
+<td>The x coordinate of the point in the centre of the stickman's head</td>
+</tr>
+<tr>
+<td>y: integer</td>
+<td>The y coordinate of the point in the centre of the stickman's head</td>
+</tr>
+<tr>
+<td>SknColour: tColor</td>
+<td>The stickman's skin colour</td>
+</tr>
+<tr>
+<td>EyColour: tColor</td>
+<td>The stickman's eye colour</td>
+</tr>
+<tr>
+<td>ClColour: tColor</td>
+<td>The colour of stickman's shirt and legs</td>
+</tr>
+<tr>
+<td>EyColour: tColor</td>
+<td>The stickman's eye colour</td>
+</tr>
+<td>Glasses: Boolean</td>
+<td>True if the guy is wearing glasses</td>
+</tr>
+<td>Beard: Boolean</td>
+<td>true only if the guy has a beard</td>
+</tr>
+</table>
+<h3><a name="Initialized"><b>property</b> Initialized: Boolean</a></h3>
+<dd>Determines if the initialize procedure has been called yet
+<dd>This is read only.
+
+<h3><a name="JackingShowModal"><b>procedure</b> JackShowModal(frm: tForm)</a></h3>
+<dd>This starts a jumping jack animation the ends with showing a form.  
+<dd>It changes the width of the form to make it look better with the stickman.
+
+<h3><a name="LeftArm"><b>property</b> LeftArm: <a href="arm.html">tArm</a></a></h3>
+<dd>The stickman's left arm
+
+<h3><a name="LeftEye"><b>property</b> LeftEye: <a href="Eye.html">tEye</a></a></h3>
+<dd>The stickman's left eye
+
+<h3><a name="LeftLeg"><b>property</b> LeftLeg: <a href="leg.html">tLeg</a></a></h3>
+<dd>The stickman's left leg
+
+<h3><a name="LipColour"><b>property</b> LipColour: tColor;</a></h3>
+<dd>This property can be used to set the colour of the stickman's lips.
+
+<h3><a name="MakingJumpingJack"><b>property</b> MakingJumpingJack: Boolean</a></h3>
+<dd>Determines if a jumping jack animation is in progress
+<dd>This is read only
+
+<h3><a name="MakeJumpingJack"><b>procedure</b> MakeJumpingJack: Boolean</a></h3>
+<dd>Starts a jumping jack animation
+
+<h3><a name="RemoveObject"><b>procedure</b> RemoveObject</a></h3>
+<dd>Get the stickman to remove an object.
+<dd>This procedure starts an animation that ends with the stickman destroying the object.
+<dd>The object can't be of any type.  It must be a tButton, tRadioGroup, tCheckBox, tLabel, or tEdit. 
+
+<h3><a name="ReplaceBackgrounds"><b>property</b> ReplaceBackgrounds: boolean</a></h3>
+<dd>Determines if the previous drawing of the stickman should be replaced by a stored bitmap of the region before any of the stickman was drawn
+<dd>Initially, this value is true.
+<dd>When this property is true, the background before each drawing of the stickman is stored.  Also, before each drawing of the stickman, the background is replaced with this stored bitmap.  This is not to be confused with the doublebuffer, though.   
+<dd>If you have a background that changes(ie is animated), I suggest setting this property to false.  If you leave it true, within the stored rectangle of the stickman(the part replaced), your animation may be flickery and dissappear.
+
+<h3><a name="RightArm"><b>property</b> RightArm:<a href="arm.html">tArm</a></a></h3>
+<dd>The stickman's right arm
+
+<h3><a name="RightEye"><b>property</b> RightEye: <a href="Eye.html">tEye</a></a></h3>
+<dd>The stickman's right eye
+
+<h3><a name="RightLeg"><b>property</b> RightLeg: <a href="leg.html">tLeg</a></a></h3>
+<dd>The stickman's right leg
+
+<h3><a name="ShirtColour"><b>property</b> ShirtColour: tColor</a></h3>
+<dd>The colour of the stickman's shirt
+
+<h3><a name="SkinColour"><b>property</b> SkinColour: tColor</a></h3>
+<dd>The colour of the stickman's skin
+
+<h3><a name="Torso"><b>property</b> Torso: tTorso</a></h3>
+<dd>The style of torso
+<dd>Possible values are: tsSkinny, tsAverage, tsLarge, tsExtraLarge, tsSpherical, tsTooLarge
+
+<h3><a name="Update"><b>procedure</b> Update</a></h3>
+<dd>Update the stickman's animation
+<dd>This also updates the stickman's arms, legs and eyes.
+<dd>This procedure is automatically called when you draw the stickman unless you set <a href="#AutoUpdate">AutoUpdate</a> to false.
+
+<h3><a name="UseDoubleBuffer"><b>property</b> UseDoubleBuffer: Boolean</a></h3>
+<dd>This is initially true.
+<dd>The double buffer is used to prevent flickery graphics.  It ensures that when the stickman is drawn, it is drawn on a second canvas before being copied to the stickman's <a href="#Canvas">canvas</a>.  This is good for when the stickman is on a form's canvas.  If the stickman is on a bitmap's, an image, or any canvas that won't show the flicker problem, I recommend setting UseDoubleBuffer to false.  This will save memory and make the graphics a little faster to draw.
+
+<h3><a name="WearingGlasses"><b>property</b> WearingGlasses: Boolean</a></h3>
+<dd>determines if the stickman is wearing glasses
+
+<h3><a name="X"><b>property</b> X: integer</a></h3>
+<dd>the x coordinate of the centre of the stickman's head
+<dd>This is the same as <a href="#HeadPos">HeadPos</a>.x but is a little easier to type
+
+<h3><a name="Y"><b>property</b> Y: integer</a></h3>
+<dd>the y coordinate of the centre of the stickman's head
+<dd>This is the same as <a href="#HeadPos">HeadPos</a>.y but is a little easier to type
+
+</BODY></HTML>

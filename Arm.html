@@ -1,0 +1,68 @@
+<html>
+<head><title>tArm Class</title></head>
+<body>
+<h1>tArm Class</h1>
+<h2>Properties and Procedures</h2>
+<ul>
+<li><a href="#AutoUpdate">AutoUpdate</a></li>
+<li><a href="#DrawArm">DrawArm</a></li>
+<li><a href="#Initialize">Initialize</a></li>
+<li><a href="#StartWaving">StartWaving</a></li>
+<li><a href="#StopWaving">StopWaving</a></li>
+<li><a href="#Update">Update</a></li>
+<li><a href="#Waving">Waving</a></li>
+</ul>
+
+<h3><a name="AutoUpdate">property AutoUpdate: Boolean</a></h3>
+<dd>This is initially true.
+<dd>To make it so the update procedure is not called every time the eye is drawn, set this to false.
+
+<h3><a name="DrawArm">procedure DrawArm(can: tcanvas;x,y: integer)</a></h3>
+<dd>This draws the arm on a canvas "can".
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>can: tCanvas</td>
+<td>the canvas the leg is to be drawn on</td>
+</tr>
+<tr>
+<td>x: integer</td>
+<td>the x coordinate of the shoulder</td>
+</tr>
+<tr>
+<td>y: integer</td>
+<td>the y coordinate of the shoulder</td>
+</tr>
+</table>
+
+<h3><a name="Initialize">procedure Initialize(InitAngle: real;iniLength: integer)</a></h3>
+<dd>This sets importent initial properties for the arm.
+<br><br>
+<dd><TABLE Border="2" CELLSPACING="1" CELLPADDING="5"><b>Parameters</b>
+<tr>
+<td>ang: real</td>
+<td>The angle of the arm</td>
+</tr>
+<tr>
+<td>iniLength: integer</td>
+<td>The length of the arm</td>
+</tr>
+</table>
+
+<h3><a name="Length">property Length: integer</a></h3>
+<dd>The length of the arm
+
+<h3><a name="StartWaving">procedure StartWaving</a></h3>
+<dd>starts a waving animation
+
+<h3><a name="StopWaving">procedure StopWaving</a></h3>
+<dd>stops a waving animation
+
+<h3><a name="Update">procedure Update</a></h3>
+<dd>This is automatically called when the arm is drawn unless AutoUpdate is false.
+
+<h3><a name="Waving">property Waving: Boolean</a></h3>
+<dd>You can use this to find out if a waving animation is in progress.
+
+</body>
+</html>
